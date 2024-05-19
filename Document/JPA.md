@@ -59,11 +59,21 @@ Tạo file `persistence.xml` trong thư mục `src/main/resources/META-INF/` và
 
 **Lưu ý:** Thay thế `your_database_name`, `your_username`, và `your_password` bằng thông tin đăng nhập SQL Server của bạn.
 
-## 2. Tạo Entity
+## 2. Tạo Bảng
+
+Hibernate có thể tự động tạo bảng dựa trên cấu hình của Entity. Sử dụng thuộc tính `hibernate.hbm2ddl.auto` trong `persistence.xml` để kiểm soát quá trình tạo bảng:
+
+- `create`: Xóa bảng hiện có và tạo bảng mới mỗi khi chạy ứng dụng.
+- `create-drop`: Tương tự `create`, nhưng xóa bảng sau khi đóng EntityManagerFactory.
+- `update`: Cập nhật schema của bảng nếu có thay đổi trong Entity.
+- `validate`: Kiểm tra xem schema của bảng có khớp với Entity hay không, nếu không sẽ báo lỗi.
+- `none`: Không thực hiện bất kỳ thao tác nào với schema của bảng.
+
+## 3. Tạo Entity
 
 Entity là các lớp Java đại diện cho các bảng trong cơ sở dữ liệu. JPA sử dụng annotations để ánh xạ các thuộc tính của lớp tới các cột trong bảng.
 
-**2.1. Entity cơ bản:**
+**3.1. Entity cơ bản:**
 
 ```java
 import jakarta.persistence.*;
@@ -96,7 +106,7 @@ public class Employee {
 - `@Column(name = "employee_name")`: Ánh xạ thuộc tính `name` tới cột `employee_name` trong bảng.
 - `columnDefinition = "VARCHAR(100)"`: Xác định trường `employee_name` trong bảng SQL là kiểu `VARCHAR` có độ dài tối đa là 100 ký tự.
 - `columnDefinition = "NVARCHAR(255)"`: Xác định trường `email` trong bảng SQL là kiểu `NVARCHAR` có độ dài tối đa là 255 ký tự.
-  **2.2. Entity với Enum:**
+  **3.2. Entity với Enum:**
 
 ```java
 @Entity
@@ -123,7 +133,7 @@ public class Product {
 
 - `@Enumerated(EnumType.STRING)`: Ánh xạ thuộc tính `category` (kiểu Enum) tới một cột trong bảng dưới dạng chuỗi.
 
-**2.3. Entity với Kế thừa:**
+**3.3. Entity với Kế thừa:**
 
 JPA hỗ trợ ba loại chiến lược kế thừa:
 
@@ -163,7 +173,7 @@ public class Customer extends Person {
 }
 ```
 
-**2.4. Entity với Quan hệ:**
+**3.4. Entity với Quan hệ:**
 
 JPA hỗ trợ các loại quan hệ sau:
 
@@ -205,16 +215,16 @@ public class Employee {
 }
 ```
 
-## 3. Thao tác Dữ liệu
+## 4. Thao tác Dữ liệu
 
-**3.1. Khởi tạo EntityManager:**
+**4.1. Khởi tạo EntityManager:**
 
 ```java
 EntityManagerFactory emf = Persistence.createEntityManagerFactory("MyPersistenceUnit");
 EntityManager em = emf.createEntityManager();
 ```
 
-**3.2. Thêm dữ liệu:**
+**4.2. Thêm dữ liệu:**
 
 ```java
 Employee employee = new Employee();
@@ -226,7 +236,7 @@ em.persist(employee);
 em.getTransaction().commit();
 ```
 
-**3.3. Xóa dữ liệu:**
+**4.3. Xóa dữ liệu:**
 
 ```java
 Employee employee = em.find(Employee.class, 1L);
@@ -236,7 +246,7 @@ em.remove(employee);
 em.getTransaction().commit();
 ```
 
-**3.4. Sửa dữ liệu:**
+**4.4. Sửa dữ liệu:**
 
 ```java
 Employee employee = em.find(Employee.class, 1L);
@@ -247,7 +257,7 @@ em.merge(employee);
 em.getTransaction().commit();
 ```
 
-**3.5. Lấy dữ liệu:**
+**4.5. Lấy dữ liệu:**
 
 ```java
 // Lấy employee theo ID
@@ -257,16 +267,6 @@ Employee employee = em.find(Employee.class, 1L);
 TypedQuery<Employee> query = em.createQuery("SELECT e FROM Employee e", Employee.class);
 List<Employee> employees = query.getResultList();
 ```
-
-## 4. Tạo Bảng
-
-Hibernate có thể tự động tạo bảng dựa trên cấu hình của Entity. Sử dụng thuộc tính `hibernate.hbm2ddl.auto` trong `persistence.xml` để kiểm soát quá trình tạo bảng:
-
-- `create`: Xóa bảng hiện có và tạo bảng mới mỗi khi chạy ứng dụng.
-- `create-drop`: Tương tự `create`, nhưng xóa bảng sau khi đóng EntityManagerFactory.
-- `update`: Cập nhật schema của bảng nếu có thay đổi trong Entity.
-- `validate`: Kiểm tra xem schema của bảng có khớp với Entity hay không, nếu không sẽ báo lỗi.
-- `none`: Không thực hiện bất kỳ thao tác nào với schema của bảng.
 
 ## 5. Tạo lớp DAO và Implement
 

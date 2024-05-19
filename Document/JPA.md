@@ -12,7 +12,6 @@ Tài liệu này cung cấp hướng dẫn chi tiết về cách sử dụng JPA
 6. Các thuộc tính trong Annotation để tạo quan hệ giữa các bảng trong JPA
 7. Ví dụ về các thuộc tính trong Annotation để tạo quan hệ giữa các bảng trong JPA
 
-
 ## 1. Chuẩn bị Môi trường
 
 **1.1. Thêm Maven Dependencies:**
@@ -45,10 +44,10 @@ Tạo file `persistence.xml` trong thư mục `src/main/resources/META-INF/` và
     <persistence-unit name="MyPersistenceUnit">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <properties>
-            <property name="javax.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=your_database_name"/>
-            <property name="javax.persistence.jdbc.user" value="your_username"/>
-            <property name="javax.persistence.jdbc.password" value="your_password"/>
+            <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=your_database_name"/>
+            <property name="jakarta.persistence.jdbc.user" value="your_username"/>
+            <property name="jakarta.persistence.jdbc.password" value="your_password"/>
             <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect"/>
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
@@ -67,6 +66,8 @@ Entity là các lớp Java đại diện cho các bảng trong cơ sở dữ li�
 **2.1. Entity cơ bản:**
 
 ```java
+import jakarta.persistence.*;
+
 @Entity
 @Table(name = "employees")
 public class Employee {
@@ -74,10 +75,13 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "employee_name")
+    @Column(name = "employee_name", length = 100, columnDefinition = "VARCHAR(100)") // Sử dụng VARCHAR
     private String name;
 
+    @Column(name = "email", nullable = false, unique = true, columnDefinition = "NVARCHAR(255)") // Sử dụng NVARCHAR
     private String email;
+
+    // ... Các thuộc tính khác
 
     // Getters and Setters
 }
@@ -85,13 +89,14 @@ public class Employee {
 
 **Giải thích:**
 
-* `@Entity`: Khai báo lớp là một entity JPA.
-* `@Table(name = "employees")`: Ánh xạ lớp tới bảng `employees` trong cơ sở dữ liệu.
-* `@Id`: Khai báo thuộc tính `id` là khóa chính của bảng.
-* `@GeneratedValue(strategy = GenerationType.IDENTITY)`: Chỉ định strategy để tạo giá trị cho khóa chính.
-* `@Column(name = "employee_name")`: Ánh xạ thuộc tính `name` tới cột `employee_name` trong bảng.
-
-**2.2. Entity với Enum:**
+- `@Entity`: Khai báo lớp là một entity JPA.
+- `@Table(name = "employees")`: Ánh xạ lớp tới bảng `employees` trong cơ sở dữ liệu.
+- `@Id`: Khai báo thuộc tính `id` là khóa chính của bảng.
+- `@GeneratedValue(strategy = GenerationType.IDENTITY)`: Chỉ định strategy để tạo giá trị cho khóa chính.
+- `@Column(name = "employee_name")`: Ánh xạ thuộc tính `name` tới cột `employee_name` trong bảng.
+- `columnDefinition = "VARCHAR(100)"`: Xác định trường `employee_name` trong bảng SQL là kiểu `VARCHAR` có độ dài tối đa là 100 ký tự.
+- `columnDefinition = "NVARCHAR(255)"`: Xác định trường `email` trong bảng SQL là kiểu `NVARCHAR` có độ dài tối đa là 255 ký tự.
+  **2.2. Entity với Enum:**
 
 ```java
 @Entity
@@ -116,15 +121,15 @@ public class Product {
 
 **Giải thích:**
 
-* `@Enumerated(EnumType.STRING)`: Ánh xạ thuộc tính `category` (kiểu Enum) tới một cột trong bảng dưới dạng chuỗi.
+- `@Enumerated(EnumType.STRING)`: Ánh xạ thuộc tính `category` (kiểu Enum) tới một cột trong bảng dưới dạng chuỗi.
 
 **2.3. Entity với Kế thừa:**
 
 JPA hỗ trợ ba loại chiến lược kế thừa:
 
-* **Table Per Class (TPC):** Mỗi lớp con được ánh xạ tới một bảng riêng biệt.
-* **Table Per Hierarchy (TPH):** Tất cả các lớp trong hệ thống phân cấp kế thừa được ánh xạ tới một bảng duy nhất.
-* **Table Per Subclass (TPS):** Mỗi lớp con được ánh xạ tới một bảng riêng biệt, nhưng bảng này chia sẻ khóa chính với bảng của lớp cha.
+- **Table Per Class (TPC):** Mỗi lớp con được ánh xạ tới một bảng riêng biệt.
+- **Table Per Hierarchy (TPH):** Tất cả các lớp trong hệ thống phân cấp kế thừa được ánh xạ tới một bảng duy nhất.
+- **Table Per Subclass (TPS):** Mỗi lớp con được ánh xạ tới một bảng riêng biệt, nhưng bảng này chia sẻ khóa chính với bảng của lớp cha.
 
 **Ví dụ TPC:**
 
@@ -162,10 +167,10 @@ public class Customer extends Person {
 
 JPA hỗ trợ các loại quan hệ sau:
 
-* **One-to-One:** Một thực thể liên kết với chính xác một thực thể khác.
-* **One-to-Many:** Một thực thể liên kết với nhiều thực thể khác.
-* **Many-to-One:** Nhiều thực thể liên kết với một thực thể khác.
-* **Many-to-Many:** Nhiều thực thể liên kết với nhiều thực thể khác.
+- **One-to-One:** Một thực thể liên kết với chính xác một thực thể khác.
+- **One-to-Many:** Một thực thể liên kết với nhiều thực thể khác.
+- **Many-to-One:** Nhiều thực thể liên kết với một thực thể khác.
+- **Many-to-Many:** Nhiều thực thể liên kết với nhiều thực thể khác.
 
 **Ví dụ One-to-Many:**
 
@@ -257,11 +262,11 @@ List<Employee> employees = query.getResultList();
 
 Hibernate có thể tự động tạo bảng dựa trên cấu hình của Entity. Sử dụng thuộc tính `hibernate.hbm2ddl.auto` trong `persistence.xml` để kiểm soát quá trình tạo bảng:
 
-* `create`: Xóa bảng hiện có và tạo bảng mới mỗi khi chạy ứng dụng.
-* `create-drop`:  Tương tự `create`, nhưng xóa bảng sau khi đóng EntityManagerFactory.
-* `update`: Cập nhật schema của bảng nếu có thay đổi trong Entity.
-* `validate`: Kiểm tra xem schema của bảng có khớp với Entity hay không, nếu không sẽ báo lỗi.
-* `none`: Không thực hiện bất kỳ thao tác nào với schema của bảng.
+- `create`: Xóa bảng hiện có và tạo bảng mới mỗi khi chạy ứng dụng.
+- `create-drop`: Tương tự `create`, nhưng xóa bảng sau khi đóng EntityManagerFactory.
+- `update`: Cập nhật schema của bảng nếu có thay đổi trong Entity.
+- `validate`: Kiểm tra xem schema của bảng có khớp với Entity hay không, nếu không sẽ báo lỗi.
+- `none`: Không thực hiện bất kỳ thao tác nào với schema của bảng.
 
 ## 5. Tạo lớp DAO và Implement
 
@@ -293,8 +298,8 @@ public interface GenericDAO<T, ID extends Serializable> {
 **5.2. Generic DAO Implement:**
 
 ```java
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
@@ -366,7 +371,7 @@ public interface EmployeeDAO extends GenericDAO<Employee, Long> {
 ```
 
 ```java
-import javax.persistence.TypedQuery;
+import jakarta.persistence.TypedQuery;
 import java.util.List;
 
 public class EmployeeDAOImpl extends GenericDAOImpl<Employee, Long> implements EmployeeDAO {
@@ -400,44 +405,44 @@ JPA cung cấp các annotations để tạo các quan hệ giữa các bảng tr
 
 **6.1. @OneToOne:**
 
-* **cascade:** Xác định cách thức cascaded operations (persist, merge, remove, refresh, detach) được áp dụng cho thực thể liên quan.
-    * `CascadeType.ALL`: Áp dụng tất cả cascaded operations.
-    * `CascadeType.PERSIST`: Áp dụng cascaded persist operation.
-    * `CascadeType.MERGE`: Áp dụng cascaded merge operation.
-    * `CascadeType.REMOVE`: Áp dụng cascaded remove operation.
-    * `CascadeType.REFRESH`: Áp dụng cascaded refresh operation.
-    * `CascadeType.DETACH`: Áp dụng cascaded detach operation.
-* **fetch:** Xác định kiểu fetch (EAGER hoặc LAZY) cho quan hệ.
-    * `FetchType.EAGER`: Dữ liệu liên quan được nạp cùng lúc với thực thể chính.
-    * `FetchType.LAZY`: Dữ liệu liên quan chỉ được nạp khi được truy cập.
-* **optional:** Xác định xem quan hệ có phải là bắt buộc hay không. Mặc định là `true`.
-* **orphanRemoval:** Xác định xem thực thể con có bị xóa khi bị tách khỏi thực thể cha hay không. Mặc định là `false`.
-* **mappedBy:** Được sử dụng ở phía non-owning của quan hệ để chỉ định thuộc tính trong thực thể sở hữu quan hệ.
+- **cascade:** Xác định cách thức cascaded operations (persist, merge, remove, refresh, detach) được áp dụng cho thực thể liên quan.
+  - `CascadeType.ALL`: Áp dụng tất cả cascaded operations.
+  - `CascadeType.PERSIST`: Áp dụng cascaded persist operation.
+  - `CascadeType.MERGE`: Áp dụng cascaded merge operation.
+  - `CascadeType.REMOVE`: Áp dụng cascaded remove operation.
+  - `CascadeType.REFRESH`: Áp dụng cascaded refresh operation.
+  - `CascadeType.DETACH`: Áp dụng cascaded detach operation.
+- **fetch:** Xác định kiểu fetch (EAGER hoặc LAZY) cho quan hệ.
+  - `FetchType.EAGER`: Dữ liệu liên quan được nạp cùng lúc với thực thể chính.
+  - `FetchType.LAZY`: Dữ liệu liên quan chỉ được nạp khi được truy cập.
+- **optional:** Xác định xem quan hệ có phải là bắt buộc hay không. Mặc định là `true`.
+- **orphanRemoval:** Xác định xem thực thể con có bị xóa khi bị tách khỏi thực thể cha hay không. Mặc định là `false`.
+- **mappedBy:** Được sử dụng ở phía non-owning của quan hệ để chỉ định thuộc tính trong thực thể sở hữu quan hệ.
 
 **6.2. @OneToMany:**
 
-* **cascade:** Giống như `@OneToOne`.
-* **fetch:** Giống như `@OneToOne`.
-* **orphanRemoval:** Giống như `@OneToOne`.
-* **mappedBy:** Được sử dụng ở phía owning của quan hệ để chỉ định thuộc tính trong thực thể sở hữu quan hệ.
+- **cascade:** Giống như `@OneToOne`.
+- **fetch:** Giống như `@OneToOne`.
+- **orphanRemoval:** Giống như `@OneToOne`.
+- **mappedBy:** Được sử dụng ở phía owning của quan hệ để chỉ định thuộc tính trong thực thể sở hữu quan hệ.
 
 **6.3. @ManyToOne:**
 
-* **cascade:** Giống như `@OneToOne`.
-* **fetch:** Giống như `@OneToOne`.
-* **optional:** Giống như `@OneToOne`.
+- **cascade:** Giống như `@OneToOne`.
+- **fetch:** Giống như `@OneToOne`.
+- **optional:** Giống như `@OneToOne`.
 
 **6.4. @ManyToMany:**
 
-* **cascade:** Giống như `@OneToOne`.
-* **fetch:** Giống như `@OneToOne`.
-* **mappedBy:** Được sử dụng ở phía owning của quan hệ để chỉ định thuộc tính trong thực thể sở hữu quan hệ.
-* **targetEntity:** Xác định kiểu của thực thể liên quan.
+- **cascade:** Giống như `@OneToOne`.
+- **fetch:** Giống như `@OneToOne`.
+- **mappedBy:** Được sử dụng ở phía owning của quan hệ để chỉ định thuộc tính trong thực thể sở hữu quan hệ.
+- **targetEntity:** Xác định kiểu của thực thể liên quan.
 
 **6.5. Các thuộc tính chung:**
 
-* **@JoinColumn:** Được sử dụng để chỉ định tên cột trong bảng hiện tại liên kết với bảng khác.
-* **@JoinTable:** Được sử dụng trong quan hệ `@ManyToMany` để chỉ định bảng trung gian kết nối hai bảng.
+- **@JoinColumn:** Được sử dụng để chỉ định tên cột trong bảng hiện tại liên kết với bảng khác.
+- **@JoinTable:** Được sử dụng trong quan hệ `@ManyToMany` để chỉ định bảng trung gian kết nối hai bảng.
 
 ## 7. Ví dụ về các thuộc tính trong Annotation để tạo quan hệ giữa các bảng trong JPA
 
@@ -539,4 +544,3 @@ public class Project {
     // Getters and Setters
 }
 ```
-
